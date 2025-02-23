@@ -7,15 +7,21 @@ function App() {
   const [trending, setTrending] = useState([]);
   const [popular, setPopular] = useState([]);
   const [recent, setRecent] = useState([]);
-  const [query, setQuery] = useState(""); // Search Query
+  const [searchQuery, setSearchQuery] = useState(""); // Search Query
 const [results, setResults] = useState([]); // Search Results
 const [isSearching, setIsSearching] = useState(false); // Tracks search state
 
   useEffect(() => {
     const getMovies = async () => {
       try {
-        const url =
+        const discoverUrl =
           "https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc";
+          const API_KEY = "e89a0e92adc135ad923c1428d155f451"; // Extracted from your token
+      const searchUrl =
+          `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}`;
+         
+        const endpoints = searchQuery? searchUrl : discoverUrl;
+        
         const options = {
           method: "GET",
           headers: {
@@ -25,7 +31,7 @@ const [isSearching, setIsSearching] = useState(false); // Tracks search state
           },
         };
 
-        const response = await fetch(url, options);
+        const response = await fetch(endpoints, options);
         if (response.ok) {
           const data = await response.json();
           console.log(data);
@@ -69,13 +75,17 @@ const [isSearching, setIsSearching] = useState(false); // Tracks search state
 
   const searchMovies = async (event) => {
     event.preventDefault();
-    if (query.trim() === "") return;// Prevent empty searches
+    if (searchQuery.trim() === "") return;// Prevent empty searches
     setIsSearching(true); // Hide homepage when searching
 
 
 
     try {
-    const response = await fetch(`${"https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc"}&query=${query}`, {
+      const API_KEY = "e89a0e92adc135ad923c1428d155f451"; // Extracted from your token
+      const searchUrl =
+          `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}`;
+         
+    const response = await fetch(`${searchUrl}&query=${searchQuery}`, {
       headers: {
         Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJlODlhMGU5MmFkYzEzNWFkOTIzYzE0MjhkMTU1ZjQ1MSIsIm5iZiI6MTczOTYwNzQ5OS41ODUsInN1YiI6IjY3YjA0ZGNiZjJlMDg0YWY3ZjM2MWU3ZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.wIILZrZAI-E59SF0JMDnEAGwavCy6SGVxwbyN-DS-g8`,
       },
@@ -113,9 +123,13 @@ const [isSearching, setIsSearching] = useState(false); // Tracks search state
           type="search"
           placeholder="Search movies & shows..."
           className="w-full px-4 py-2 rounded-full bg-gray-800 text-white focus:ring-2 focus:ring-purple-600 focus:outline-none"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          value={searchQuery}
+          onChange={(e) => {setSearchQuery(e.target.value);
+            console.log(e.target.value);
+}}
+                       
         />
+        
         <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -134,6 +148,9 @@ const [isSearching, setIsSearching] = useState(false); // Tracks search state
         </button>
       </form>
       {/* Search Results */}
+      {isSearching && (
+        <div className="px-4 mt-6">
+          <h2 className="text-xl font-bold mb-4">Search Results</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4 px-4">
         {results.map((movie) => (
           <div key={movie.id} className="bg-gray-900 p-2 rounded-lg">
@@ -148,12 +165,14 @@ const [isSearching, setIsSearching] = useState(false); // Tracks search state
         ))}
       </div>
       </div>
+      )}
+      </div>
     </nav>
 
     {/* <!-- Hero Section --> */}
     <section className="relative h-[85vh] mt-16">
       <div
-        className="absolute inset-0 bg-[url('https://source.unsplash.com/random/1920x1080/?movie')] bg-cover bg-center"
+        className="absolute inset-0 bg-[discoverUrl('https://source.unsplash.com/random/1920x1080/?movie')] bg-cover bg-center"
       >
         <div
           className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"
